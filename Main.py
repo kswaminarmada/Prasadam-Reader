@@ -82,7 +82,6 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
-
     def bind_Events(self):
         curdate = self.dbCon.SelectCommand("select cast(curdate() as char)", self.dbCon.CmdType.SelectOne )
         year,month,day = curdate[0].split('-')
@@ -91,18 +90,16 @@ class Ui_MainWindow(object):
         self.dt.setDate(QtCore.QDate(int(year),int(month),int(day)))
         self.txt.returnPressed.connect(self.BarcodeRead)
         self.cmd.clicked.connect(self.FillTable)
-    
 
     def __init__(self):
         #self.setupUi(self)
         self.dbCon = DB_manager.DatabaseUtility("192.168.1.82","prasadam","MySQLClient","123")
         
-        
     def FillTable(self):
         day,month,year = self.dt.text().split("/")
         dts = "-".join([year,month,day])
         col = self.dbCon.GetColumns("reader_pendingqty")  #self.dbu.GetColumns()
-        table = self.dbCon.GetTable("reader_pendingqty where ordereddate = '{0}' and department='{1}'".format(dts,'Bakery'))
+        table = self.dbCon.GetTable("reader_pendingqty where ordereddate = '{0}' and department='{1}'".format(dts,'Soda'))
         
         #self.tableWidget.clear()
         headerlbl = []
@@ -130,29 +127,18 @@ class Ui_MainWindow(object):
     def BarcodeRead(self):
         tkno = self.txt.text()
         try:
-            #db_config = read_db_config()
-            #conn = MySQLConnection(**db_config)
-            #cursor = conn.cursor()
             tknos = tkno.split('-',1)
             tkno = int(tknos[0])
             dpt = int(tknos[1])
             args = [tkno, dpt]
-            result_args = cur.callproc('Insert_ReaderData', args)
-    
-            print("Read Successfully")
-    
+            result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
+      
         except Error as e:
-            msgbox.warning(MainWindow,"MySQL Error",str(e),QtWidgets.QMessageBox.Warning)
+            msgbox.warning(MainWindow,"MySQL Error",str(e.msg))
     
         finally:
-            cur.close()
-            conn.close()
+            self.txt.selectAll()
 
-        self.txt.selectAll()
-
-    def barcode_read(self):
-        msgbox.question(MainWindow,"Hi","YOur Message", QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No)
-        
 if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)

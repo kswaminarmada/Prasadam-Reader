@@ -3,6 +3,7 @@ from mysql.connector import MySQLConnection, Error
 from sys import version_info
 from enum import Enum
 
+'''
 msgbox = None
 
 if version_info[0] < 3:
@@ -11,9 +12,9 @@ if version_info[0] < 3:
 else:
 	from tkinter import messagebox
 	msgbox = messagebox
-
+'''
 class DatabaseUtility: 
-	ConnectionStringArgs = {'host': '', 'database': '', 'user': '', 'password': ''}
+	ConnectionStringArgs = {'host': '', 'database': '', 'user': '', 'password': '', 'port': 3306}
 	class CmdType(Enum):
 		SelectOne = 1
 		SelectAll = 2
@@ -29,26 +30,48 @@ class DatabaseUtility:
 	def __init__(self,host, database,user,pwd):
 		self.setMySQLConnection(host,database,user,pwd)
 		try:
+			#self.conn.config(**self.ConnectionStringArgs)
 			self.conn = MySQLConnection(**self.ConnectionStringArgs)
 			self.cursor = self.conn.cursor()
 		except Error as err:
-			global msgbox
-			raise Error("MySQL Error",str(err.msg))
-			#msgbox.showerror("MySQL Error",str(err.msg))
-			#print("Error Message : " + str(err.msg))
-
+			raise Error("Error Message : "+ str(err.msg))
+			
 	def GetTable(self,tblName):
 		return self.RunCommand("SELECT * FROM %s;" % tblName)
 
 	def GetColumns(self,tblName):
 		return self.RunCommand("SHOW COLUMNS FROM %s;" % tblName)
 
-	def SelectCommand(self, cmd, SelectMode):
-		#print ("RUNNING COMMAND: " + cmd)
+	def RunCommand(self, cmd):
 		try:
-			self.conn.close()
 			if not self.conn.is_connected():
 				self.conn._open_connection()
+				self.cursor = self.conn.cursor()
+			
+			self.cursor.execute(cmd)
+			
+			msg = None
+			
+			try:
+				msg = self.cursor.fetchall()
+			except:
+				msg = self.cursor.fetchone()
+				
+			#return msg
+		except Error as err:
+			print ('ERROR MESSAGE: ' + str(err.msg))
+		finally:
+			self.cursor.close()
+			self.conn.close()
+		
+		return msg
+	
+	def SelectCommand(self, cmd, SelectMode):
+		try:
+			if not self.conn.is_connected():
+				self.conn._open_connection()
+				self.cursor = self.conn.cursor()
+			
 			self.cursor.execute(cmd)
 			
 			msg = None
@@ -62,39 +85,51 @@ class DatabaseUtility:
 				
 			#return msg
 		except Error as err:
-			print ('ERROR MESSAGE: ' + str(err.msg))
+			raise Error('ERROR MESSAGE: ' + str(err.msg))
 		finally:
 			self.cursor.close()
 			self.conn.close()
 		
 		return msg
-
 		
-	def InsertCommand(self, cmd, args=none):
+	def InsertCommand(self, cmd, args=None):
 		#print ("RUNNING COMMAND: " + cmd)
 		try:
-			self.conn.close()
 			if not self.conn.is_connected():
 				self.conn._open_connection()
-			
+				self.cursor = self.conn.cursor()
+
 			msg = None
 			if SelectMode == self.CmdType.InsertOne:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd,args)
 			elif SelectMode == self.CmdType.InsertMany:
 				msg = self.cursor.executemany(cmd,args)
 			else:
-				msg = None
-				raise ValueError("Invalid SelectMode")
-				
+				self.cursor.execute(cmd)
+			
+			self.conn.commit()	
 			#return msg
 		except Error as err:
-			print ('ERROR MESSAGE: ' + str(err.msg))
+			raise Error('ERROR MESSAGE: ' + str(err.msg))
 		finally:
 			self.cursor.close()
 			self.conn.close()
 		
-		
-		
+	def ExecuteStoredProcedure(self,ProcedureName,in_args=None):
+		try:
+			if not self.conn.is_connected():
+				self.conn._open_connection()
+				self.cursor = self.conn.cursor()
+			
+			Out_args = self.cursor.callproc(ProcedureName,in_args)
+			
+			self.conn.commit()
+		except Error as err:
+			raise Error('ERROR MESSAGE: ' + str(err.msg))
+		finally:
+			self.cursor.close()
+			self.conn.close()	
+		return Out_args
 
 	def __del__(self):
 		self.conn.commit()
