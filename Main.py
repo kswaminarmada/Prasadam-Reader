@@ -22,9 +22,10 @@ class Ui_MainWindow(object):
         self.lbl.setObjectName("lbl")
         self.txt = QtWidgets.QLineEdit(self.centralwidget)
         self.txt.setGeometry(QtCore.QRect(120, 70, 113, 20))
+        self.txt.setAlignment(QtCore.Qt.AlignCenter)
         self.txt.setObjectName("txt")
         self.dt = QtWidgets.QDateEdit(self.centralwidget)
-        self.dt.setEnabled(False)
+        self.dt.setEnabled(True)
         self.dt.setGeometry(QtCore.QRect(120, 10, 111, 22))
         self.dt.setInputMethodHints(QtCore.Qt.ImhPreferNumbers)
         self.dt.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
@@ -38,12 +39,12 @@ class Ui_MainWindow(object):
         self.cmd.setDefault(True)
         self.cmd.setObjectName("cmd")
         self.cbo = QtWidgets.QComboBox(self.centralwidget)
-        self.cbo.setEnabled(False)
+        self.cbo.setEnabled(True)
         self.cbo.setGeometry(QtCore.QRect(120, 40, 111, 20))
         self.cbo.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.India))
         self.cbo.setEditable(False)
         self.cbo.setCurrentText("")
-        self.cbo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.cbo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContentsOnFirstShow)
         self.cbo.setMinimumContentsLength(111)
         self.cbo.setFrame(False)
         self.cbo.setModelColumn(0)
@@ -51,7 +52,7 @@ class Ui_MainWindow(object):
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(10, 100, 551, 301))
         self.tableWidget.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setTabKeyNavigation(False)
         self.tableWidget.setObjectName("tableWidget")
@@ -66,13 +67,14 @@ class Ui_MainWindow(object):
         self.lbl_3 = QtWidgets.QLabel(self.centralwidget)
         self.lbl_3.setGeometry(QtCore.QRect(30, 40, 81, 21))
         self.lbl_3.setMaximumSize(QtCore.QSize(81, 16777215))
-        self.lbl_3.setText("<html><head/><body><p>Department :</p></body></html>")
+        self.lbl_3.setText("Department :")
         self.lbl_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_3.setObjectName("lbl_3")
         MainWindow.setCentralWidget(self.centralwidget)
         
         self.retranslateUi(MainWindow)
         self.bind_Events()
+        
         MainWindow.setTabOrder(self.dt, self.cbo)
         MainWindow.setTabOrder(self.cbo, self.txt)
         MainWindow.setTabOrder(self.txt, self.cmd)
@@ -83,33 +85,30 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
     def bind_Events(self):
-        curdate = self.dbCon.SelectCommand("select cast(curdate() as char)", self.dbCon.CmdType.SelectOne )
+        curdate = self.dbCon.SelectCommand("select cast(curdate() as char)")
         year,month,day = curdate[0].split('-')
-        #curdate = self.dbCon.RunCommand("select curdate()")
-        #year,month,day = curdate[0][0].year, curdate[0][0].month,curdate[0][0].day
         self.dt.setDate(QtCore.QDate(int(year),int(month),int(day)))
         self.txt.returnPressed.connect(self.BarcodeRead)
         self.cmd.clicked.connect(self.FillTable)
+        self.FillDepartment()
 
     def __init__(self):
-        #self.setupUi(self)
         self.dbCon = DB_manager.DatabaseUtility("192.168.1.82","prasadam","MySQLClient","123")
-        
+
+    def FillDepartment(self):
+        departments = self.dbCon.SelectCommand("select `Department` from department")
+        for dept in departments:
+            self.cbo.addItem(dept[0])
+
     def FillTable(self):
         day,month,year = self.dt.text().split("/")
         dts = "-".join([year,month,day])
-        col = self.dbCon.GetColumns("reader_pendingqty")  #self.dbu.GetColumns()
-        table = self.dbCon.GetTable("reader_pendingqty where ordereddate = '{0}' and department='{1}'".format(dts,'Soda'))
+        dept = self.cbo.currentText()
+        table,headerlbl = self.dbCon.GetTable("reader_pendingqty where ordereddate = '{0}' and department='{1}'".format(dts,dept))
         
-        #self.tableWidget.clear()
-        headerlbl = []
-        for c in range(len(col)):
-            headerlbl.append(col[c][0])
-
         self.tableWidget.setRowCount(0)
         self.tableWidget.setColumnCount(len(headerlbl))
-        self.tableWidget.setHorizontalHeaderLabels(headerlbl)
-        self.cbo.addItems(headerlbl)
+        self.tableWidget.setHorizontalHeaderLabels(headerlbl)   
         self.tableWidget.setColumnHidden(0,True)
         self.tableWidget.setColumnHidden(1,True)
         
@@ -122,7 +121,7 @@ class Ui_MainWindow(object):
                     newitem.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.tableWidget.setItem(r,c,newitem)
 
-        #self.barcode_read()        
+                
 
     def BarcodeRead(self):
         tkno = self.txt.text()

@@ -36,11 +36,26 @@ class DatabaseUtility:
 		except Error as err:
 			raise Error("Error Message : "+ str(err.msg))
 			
-	def GetTable(self,tblName):
-		return self.RunCommand("SELECT * FROM %s;" % tblName)
+	def GetTable(self,tblName, withColumnName=True):
+		result = self.RunCommand("SELECT * FROM %s;" % tblName)
+		if withColumnName == True:
+			return result
+		else:
+			return result[0]
+
+	def GetTableColumn(self,tblName, ColumnName , withColumnName=True):
+		qur = "SELECT {0} FROM {1}".format(ColumnName,tblName)
+		result = self.RunCommand(qur)
+		if withColumnName == True:
+			return result
+		else:
+			return result[0]
 
 	def GetColumns(self,tblName):
 		return self.RunCommand("SHOW COLUMNS FROM %s;" % tblName)
+
+	def GetCursor(self):
+		return self.conn.cursor()
 
 	def RunCommand(self, cmd):
 		try:
@@ -48,61 +63,50 @@ class DatabaseUtility:
 				self.conn._open_connection()
 				self.cursor = self.conn.cursor()
 			
-			self.cursor.execute(cmd)
-			
-			msg = None
-			
-			try:
-				msg = self.cursor.fetchall()
-			except:
-				msg = self.cursor.fetchone()
-				
-			#return msg
-		except Error as err:
-			print ('ERROR MESSAGE: ' + str(err.msg))
-		finally:
-			self.cursor.close()
-			self.conn.close()
-		
-		return msg
-	
-	def SelectCommand(self, cmd, SelectMode):
-		try:
-			if not self.conn.is_connected():
-				self.conn._open_connection()
-				self.cursor = self.conn.cursor()
 			
 			self.cursor.execute(cmd)
-			
-			msg = None
-			if SelectMode == self.CmdType.SelectAll:
-				msg = self.cursor.fetchall()
-			elif SelectMode == self.CmdType.SelectOne:
-				msg = self.cursor.fetchone()
-			else:
-				msg = None
-				raise ValueError("Invalid SelectMode")
+			rows = self.cursor.fetchall()
+			if len(rows) == 1:
+				rows = rows[0]
 				
-			#return msg
+			columnName = self.cursor.column_names
 		except Error as err:
 			raise Error('ERROR MESSAGE: ' + str(err.msg))
 		finally:
 			self.cursor.close()
 			self.conn.close()
 		
-		return msg
+		return rows, columnName
+	
+	def SelectCommand(self, cmdText):
+		try:
+			if not self.conn.is_connected():
+				self.conn.reconnect(2,2)
+				self.cursor = self.conn.cursor()
+			
+			self.cursor.execute(cmdText)
+			rows = self.cursor.fetchall()
+			if len(rows) == 1:
+				rows = rows[0]
+				
+		except Error as err:
+			raise Error('ERROR MESSAGE: ' + str(err.msg))
+		finally:
+			self.cursor.close()
+			self.conn.close()
 		
-	def InsertCommand(self, cmd, args=None):
-		#print ("RUNNING COMMAND: " + cmd)
+		return rows
+		
+	def InsertCommand(self, cmd, args=None, InsertMode = None):
 		try:
 			if not self.conn.is_connected():
 				self.conn._open_connection()
 				self.cursor = self.conn.cursor()
 
 			msg = None
-			if SelectMode == self.CmdType.InsertOne:
+			if InsertMode == self.CmdType.InsertOne:
 				self.cursor.execute(cmd,args)
-			elif SelectMode == self.CmdType.InsertMany:
+			elif InsertMode == self.CmdType.InsertMany:
 				msg = self.cursor.executemany(cmd,args)
 			else:
 				self.cursor.execute(cmd)
