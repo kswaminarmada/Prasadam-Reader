@@ -2,7 +2,10 @@
 from mysql.connector import MySQLConnection, Error
 from sys import version_info
 from enum import Enum
+from configparser import ConfigParser as cfgParser
 
+
+cnfFileName = "ReaderConfig.ini"
 '''
 msgbox = None
 
@@ -81,7 +84,7 @@ class DatabaseUtility:
 	def SelectCommand(self, cmdText):
 		try:
 			if not self.conn.is_connected():
-				self.conn.reconnect(2,2)
+				self.conn._open_connection()
 				self.cursor = self.conn.cursor()
 			
 			self.cursor.execute(cmdText)
@@ -92,7 +95,7 @@ class DatabaseUtility:
 		except Error as err:
 			raise Error('ERROR MESSAGE: ' + str(err.msg))
 		finally:
-			self.cursor.close()
+ 			self.cursor.close()
 			self.conn.close()
 		
 		return rows
