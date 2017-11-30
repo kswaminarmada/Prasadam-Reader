@@ -139,8 +139,13 @@ class Ui_MainWindow(object):
             tknos = tkno.split('-',1)
             tkno = int(tknos[0])
             dpt = int(tknos[1])
-            args = [tkno, dpt]
-            result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
+            grpdept = str(self.MySettings['departmentgroup'])
+
+            if grpdept.find(tknos[1]) >= 0:
+                args = [tkno, dpt]
+                result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
+            else:
+                msgbox.information(MainWindow,"Invalid Department","Not Valid TokenNo with your Department Group.")
       
         except Error as e:
             msgbox.warning(MainWindow,"MySQL Error",str(e.msg))

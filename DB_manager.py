@@ -16,8 +16,6 @@ else:
 
 
 class DatabaseUtility:
-    #ConnectionStringArgs = {'host': '', 'database': '',
-    #                        'user': '', 'password': '', 'port': '3306'}
     ConnectionStringArgs={}
     class CmdType(Enum):
         SelectOne = 1
