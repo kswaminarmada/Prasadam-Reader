@@ -96,7 +96,7 @@ class Ui_MainWindow(object):
         self.dbCon = DB_manager.DatabaseUtility("192.168.1.82","prasadam","MySQLClient","123")
 
     def FillDepartment(self):
-        departments = self.dbCon.SelectCommand("select `Department` from department where de")
+        departments = self.dbCon.SelectCommand("select `Department` from department")
         for dept in departments:
             self.cbo.addItem(dept[0])
 
