@@ -2,9 +2,11 @@ import sys, DB_manager
 from PyQt5 import QtWidgets,QtCore,QtGui
 from datetime import datetime
 from mysql.connector import Error
+from MyConfig import MyConfigs
 
 msgbox = QtWidgets.QMessageBox
 class Ui_MainWindow(object):
+    MySettings = {}
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(570, 408)
@@ -93,8 +95,12 @@ class Ui_MainWindow(object):
         self.FillDepartment()
 
     def __init__(self):
-        self.dbCon = DB_manager.DatabaseUtility("192.168.1.82","prasadam","MySQLClient","123")
-
+        
+        cfgs = MyConfigs()
+        connstring = cfgs.Get_db_config()
+        self.MySettings = cfgs.Get_MySetting('MySetting')
+        self.dbCon = DB_manager.DatabaseUtility(**connstring)
+        
     def FillDepartment(self):
         departments = self.dbCon.SelectCommand("select `Department` from department")
         for dept in departments:
@@ -102,17 +108,21 @@ class Ui_MainWindow(object):
 
     def FillTable(self):
         day,month,year = self.dt.text().split("/")
-        dts = "-".join([year,month,day])
+        dts = "-".join([year,month,day]) 
+        Viscols = self.MySettings['visiblecols']
+        depts = self.MySettings['departmentgroup']
         dept = self.cbo.currentText()
-        table,headerlbl = self.dbCon.GetTable("reader_pendingqty where ordereddate = '{0}' and department='{1}'".format(dts,dept))
-        
+        table, headerlbl = self.dbCon.GetTable(
+            "reader_pendingqty where ordereddate='{0}' and department in (select dept.Department from department as dept where ID in ({1}))".format(dts, str(depts)))
+
         self.tableWidget.setRowCount(0)
         self.tableWidget.setColumnCount(len(headerlbl))
-        self.tableWidget.setHorizontalHeaderLabels(headerlbl)   
-        self.tableWidget.setColumnHidden(0,True)
-        self.tableWidget.setColumnHidden(1,True)
-        
-
+        self.tableWidget.setHorizontalHeaderLabels(headerlbl)
+        cols = self.tableWidget.columnCount()
+        for i in range(0,cols):
+            if str(Viscols).find(str(i)) < 0:
+                self.tableWidget.setColumnHidden(i,True)
+                
         for r, r_data in enumerate(table):
             self.tableWidget.insertRow(r)
             for c, data in enumerate(r_data):

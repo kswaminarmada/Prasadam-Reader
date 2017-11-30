@@ -16,23 +16,24 @@ else:
 
 
 class DatabaseUtility:
-    ConnectionStringArgs = {'host': '', 'database': '',
-                            'user': '', 'password': '', 'port': 3306}
-
+    #ConnectionStringArgs = {'host': '', 'database': '',
+    #                        'user': '', 'password': '', 'port': '3306'}
+    ConnectionStringArgs={}
     class CmdType(Enum):
         SelectOne = 1
         SelectAll = 2
         InsertOne = 3
         InsertMany = 4
 
-    def setMySQLConnection(self, host, database, user, pwd):
+    def setMySQLConnection(self, host, database, user, password, port='3306'):
         self.ConnectionStringArgs['host'] = host
         self.ConnectionStringArgs['database'] = database
         self.ConnectionStringArgs['user'] = user
-        self.ConnectionStringArgs['password'] = pwd
+        self.ConnectionStringArgs['password'] = password
+        self.ConnectionStringArgs['port'] = int(port)
 
-    def __init__(self, host, database, user, pwd):
-        self.setMySQLConnection(host, database, user, pwd)
+    def __init__(self, host, database, user, password,port):
+        self.setMySQLConnection(host, database, user, password, port)
         try:
             # self.conn.config(**self.ConnectionStringArgs)
             self.conn = MySQLConnection(**self.ConnectionStringArgs)
