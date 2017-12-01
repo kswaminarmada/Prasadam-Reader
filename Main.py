@@ -85,17 +85,17 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-
+        
     def bind_Events(self):
         curdate = self.dbCon.SelectCommand("select cast(curdate() as char)")
         year,month,day = curdate[0].split('-')
+        MainWindow.setWindowTitle(self.MySettings['location'])
         self.dt.setDate(QtCore.QDate(int(year),int(month),int(day)))
         self.txt.returnPressed.connect(self.BarcodeRead)
         self.cmd.clicked.connect(self.FillTable)
         self.FillDepartment()
 
     def __init__(self):
-        
         cfgs = MyConfigs()
         connstring = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')
@@ -130,9 +130,7 @@ class Ui_MainWindow(object):
                 if c>=3:
                     newitem.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.tableWidget.setItem(r,c,newitem)
-
-                
-
+    
     def BarcodeRead(self):
         tkno = self.txt.text()
         try:
