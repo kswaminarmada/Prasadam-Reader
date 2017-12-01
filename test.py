@@ -91,7 +91,6 @@ class Ui_MainWindow(object):
         self.mnuExit = QtWidgets.QAction(MainWindow)
         self.mnuExit.setObjectName("mnuExit")
         self.menuCounter.addAction(self.mnuSettings)
-        self.menuCounter.addAction(self.mnuDeptGrp)
         self.menuCounter.addSeparator()
         self.menuCounter.addAction(self.mnuExit)
         self.menuBar.addAction(self.menuCounter.menuAction())

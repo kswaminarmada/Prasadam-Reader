@@ -236,7 +236,6 @@
      <string>Counter</string>
     </property>
     <addaction name="mnuSettings"/>
-    <addaction name="mnuDeptGrp"/>
     <addaction name="separator"/>
     <addaction name="mnuExit"/>
    </widget>
