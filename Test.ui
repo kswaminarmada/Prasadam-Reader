@@ -67,6 +67,9 @@
       <height>22</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="inputMethodHints">
      <set>Qt::ImhPreferNumbers</set>
     </property>
@@ -96,6 +99,9 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="text">
      <string notr="true">Ok</string>
     </property>
@@ -114,6 +120,9 @@
       <width>111</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="locale">
      <locale language="English" country="India"/>
@@ -145,6 +154,9 @@
       <width>551</width>
       <height>301</height>
      </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -210,6 +222,41 @@
     </property>
    </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>570</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuCounter">
+    <property name="title">
+     <string>Counter</string>
+    </property>
+    <addaction name="mnuSettings"/>
+    <addaction name="mnuDeptGrp"/>
+    <addaction name="separator"/>
+    <addaction name="mnuExit"/>
+   </widget>
+   <addaction name="menuCounter"/>
+  </widget>
+  <action name="mnuSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="mnuDeptGrp">
+   <property name="text">
+    <string>Department Group</string>
+   </property>
+  </action>
+  <action name="mnuExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>dt</tabstop>
@@ -221,18 +268,18 @@
  <resources/>
  <connections>
   <connection>
-   <sender>cmd</sender>
-   <signal>clicked()</signal>
+   <sender>mnuExit</sender>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
-     <y>126</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>235</x>
-     <y>126</y>
+     <x>284</x>
+     <y>203</y>
     </hint>
    </hints>
   </connection>

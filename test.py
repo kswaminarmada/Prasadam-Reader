@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'test.ui'
+# Form implementation generated from reading ui file 'Test.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.1
 #
@@ -30,6 +30,7 @@ class Ui_MainWindow(object):
         self.dt = QtWidgets.QDateEdit(self.centralwidget)
         self.dt.setEnabled(False)
         self.dt.setGeometry(QtCore.QRect(120, 10, 111, 22))
+        self.dt.setFocusPolicy(QtCore.Qt.NoFocus)
         self.dt.setInputMethodHints(QtCore.Qt.ImhPreferNumbers)
         self.dt.setButtonSymbols(QtWidgets.QAbstractSpinBox.PlusMinus)
         self.dt.setSpecialValueText("")
@@ -38,12 +39,14 @@ class Ui_MainWindow(object):
         self.dt.setObjectName("dt")
         self.cmd = QtWidgets.QPushButton(self.centralwidget)
         self.cmd.setGeometry(QtCore.QRect(240, 70, 61, 21))
+        self.cmd.setFocusPolicy(QtCore.Qt.NoFocus)
         self.cmd.setText("Ok")
         self.cmd.setDefault(True)
         self.cmd.setObjectName("cmd")
         self.cbo = QtWidgets.QComboBox(self.centralwidget)
         self.cbo.setEnabled(False)
         self.cbo.setGeometry(QtCore.QRect(120, 40, 111, 20))
+        self.cbo.setFocusPolicy(QtCore.Qt.NoFocus)
         self.cbo.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.India))
         self.cbo.setEditable(False)
         self.cbo.setCurrentText("")
@@ -54,6 +57,7 @@ class Ui_MainWindow(object):
         self.cbo.setObjectName("cbo")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(10, 100, 551, 301))
+        self.tableWidget.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tableWidget.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -74,12 +78,29 @@ class Ui_MainWindow(object):
         self.lbl_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_3.setObjectName("lbl_3")
         MainWindow.setCentralWidget(self.centralwidget)
+        self.menuBar = QtWidgets.QMenuBar(MainWindow)
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 570, 21))
+        self.menuBar.setObjectName("menuBar")
+        self.menuCounter = QtWidgets.QMenu(self.menuBar)
+        self.menuCounter.setObjectName("menuCounter")
+        MainWindow.setMenuBar(self.menuBar)
+        self.mnuSettings = QtWidgets.QAction(MainWindow)
+        self.mnuSettings.setObjectName("mnuSettings")
+        self.mnuDeptGrp = QtWidgets.QAction(MainWindow)
+        self.mnuDeptGrp.setObjectName("mnuDeptGrp")
+        self.mnuExit = QtWidgets.QAction(MainWindow)
+        self.mnuExit.setObjectName("mnuExit")
+        self.menuCounter.addAction(self.mnuSettings)
+        self.menuCounter.addAction(self.mnuDeptGrp)
+        self.menuCounter.addSeparator()
+        self.menuCounter.addAction(self.mnuExit)
+        self.menuBar.addAction(self.menuCounter.menuAction())
         self.lbl.setBuddy(self.txt)
         self.lbl_2.setBuddy(self.txt)
         self.lbl_3.setBuddy(self.txt)
 
         self.retranslateUi(MainWindow)
-        self.cmd.clicked.connect(MainWindow.close)
+        self.mnuExit.triggered.connect(MainWindow.close)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.dt, self.cbo)
         MainWindow.setTabOrder(self.cbo, self.txt)
@@ -89,6 +110,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.menuCounter.setTitle(_translate("MainWindow", "Counter"))
+        self.mnuSettings.setText(_translate("MainWindow", "Settings"))
+        self.mnuDeptGrp.setText(_translate("MainWindow", "Department Group"))
+        self.mnuExit.setText(_translate("MainWindow", "Exit"))
 
 
 if __name__ == "__main__":
