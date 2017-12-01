@@ -1,32 +1,38 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import DB_manager
 from Main import Ui_MainWindow
+from MyConfig import MyConfigs
 
 msgbox = QtWidgets.QMessageBox
 
 class Ui_login(object):
     def __init__(self):
-        self.dbCon = DB_manager.DatabaseUtility("prasadam")
+        cfgs = MyConfigs()
+        connstring = cfgs.Get_db_config()
+        self.dbCon = DB_manager.DatabaseUtility(**connstring)
     
-    def Mainwinshow(self):
+    def Mainwinshow(self,IsAdmin=False):
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
-        self.ui.setupUi(self.MainWindow)
+        self.ui.setupUi(self.MainWindow, IsAdmin)
         login.hide()
         self.MainWindow.show()
         
     def checklogin(self):
         user = self.cboUser.currentText()
         pwd = self.txtPwd.text()
-        tbl = self.dbCon.GetTable("users where UserName = '{0}' and Password = '{1}'".format(user,pwd))
+        tbl = self.dbCon.SelectCommand("select * from users where UserName = '{0}' and Password = '{1}'".format(user,pwd))
         if len(tbl)> 0:
-            self.Mainwinshow()
+            IsAdm = bool(tbl[3])
+            self.Mainwinshow(IsAdm)
         else:
-            msgbox.information(login,"Invalid Credentials","Invalid Password, try Again",msgbox.Ok)
-            self.txtPwd.setFocus() 
+            if msgbox.information(login,"Invalid Credentials","Invalid Password, try Again",msgbox.Ok|msgbox.Ignore) == msgbox.Ignore:
+                self.Mainwinshow(False)
+            else:
+                self.txtPwd.setFocus() 
 
     def FillUsers(self):
-        tbl = self.dbCon.RunCommand("select UserName from users")
+        tbl = self.dbCon.SelectCommand("select UserName from users")
         for usr in tbl:
             self.cboUser.addItem(usr[0])
 

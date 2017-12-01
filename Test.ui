@@ -162,7 +162,7 @@
      <enum>QFrame::StyledPanel</enum>
     </property>
     <property name="sizeAdjustPolicy">
-     <enum>QAbstractScrollArea::AdjustToContents</enum>
+     <enum>QAbstractScrollArea::AdjustIgnored</enum>
     </property>
     <property name="editTriggers">
      <set>QAbstractItemView::NoEditTriggers</set>
@@ -170,6 +170,9 @@
     <property name="tabKeyNavigation">
      <bool>false</bool>
     </property>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
    </widget>
    <widget class="QLabel" name="lbl_2">
     <property name="geometry">

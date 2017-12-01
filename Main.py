@@ -3,11 +3,14 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 from datetime import datetime
 from mysql.connector import Error
 from MyConfig import MyConfigs
+from MySettings import Ui_Dialog
 
 msgbox = QtWidgets.QMessageBox
 class Ui_MainWindow(object):
     MySettings = {}
-    def setupUi(self, MainWindow):
+    DeptGrp = {}
+    IsAdmin = False
+    def setupUi(self, MainWindow, isAdmin=False):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(570, 408)
         font = QtGui.QFont()
@@ -57,12 +60,13 @@ class Ui_MainWindow(object):
         self.tableWidget.setGeometry(QtCore.QRect(10, 100, 551, 301))
         self.tableWidget.setFocusPolicy(QtCore.Qt.NoFocus)
         self.tableWidget.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setTabKeyNavigation(False)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
+        self.tableWidget.verticalHeader().setVisible(False)
         self.lbl_2 = QtWidgets.QLabel(self.centralwidget)
         self.lbl_2.setGeometry(QtCore.QRect(30, 10, 81, 20))
         self.lbl_2.setMaximumSize(QtCore.QSize(81, 16777215))
@@ -103,8 +107,9 @@ class Ui_MainWindow(object):
         MainWindow.setTabOrder(self.cbo, self.txt)
         MainWindow.setTabOrder(self.txt, self.cmd)
         MainWindow.setTabOrder(self.cmd, self.tableWidget)
-        self.bind_Events()
-
+        self.IsAdmin = isAdmin
+        self.bind_Events(MainWindow)
+    
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -113,42 +118,53 @@ class Ui_MainWindow(object):
         self.mnuDeptGrp.setText(_translate("MainWindow", "Department Group"))
         self.mnuExit.setText(_translate("MainWindow", "Exit"))
         
-    def bind_Events(self):
+    def bind_Events(self,MainWindow):
         curdate = self.dbCon.SelectCommand("select cast(curdate() as char)")
         year,month,day = curdate[0].split('-')
         MainWindow.setWindowTitle(self.MySettings['location'])
         self.dt.setDate(QtCore.QDate(int(year),int(month),int(day)))
         self.txt.returnPressed.connect(self.BarcodeRead)
         self.cmd.clicked.connect(self.FillTable)
+        self.mnuSettings.triggered.connect(self.Show_SettingWindow)
         self.FillDepartment()
+        self.mnuSettings.setEnabled(self.IsAdmin)
+        self.dt.setEnabled(self.IsAdmin)
+        self.cbo.setEnabled(self.IsAdmin)
 
     def __init__(self):
         cfgs = MyConfigs()
         connstring = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')
+        self.DeptGrp = cfgs.Get_MySetting('DepartmentGroup')
         self.dbCon = DB_manager.DatabaseUtility(**connstring)
         
     def FillDepartment(self):
-        departments = self.dbCon.SelectCommand("select `Department` from department")
-        for dept in departments:
-            self.cbo.addItem(dept[0])
+        departments = self.DeptGrp.keys()
+        self.cbo.addItems(departments)
+        #for dept in departments:
+        #   self.cbo.addItem(dept)
+        self.cbo.setCurrentText(self.MySettings['departmentgroup'])
 
     def FillTable(self):
         day,month,year = self.dt.text().split("/")
         dts = "-".join([year,month,day]) 
-        Viscols = self.MySettings['visiblecols']
-        depts = self.MySettings['departmentgroup']
-        dept = self.cbo.currentText()
+        depts = self.get_deptIDs()
+        #dept = self.cbo.currentText()
         table, headerlbl = self.dbCon.GetTable(
             "reader_pendingqty where ordereddate='{0}' and department in (select dept.Department from department as dept where ID in ({1}))".format(dts, str(depts)))
-
+        Viscols = self.MySettings['visiblecols']
         self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(len(headerlbl))
-        self.tableWidget.setHorizontalHeaderLabels(headerlbl)
-        cols = self.tableWidget.columnCount()
-        for i in range(0,cols):
-            if str(Viscols).find(str(i)) < 0:
-                self.tableWidget.setColumnHidden(i,True)
+        if self.tableWidget.columnCount() < 1:
+            self.tableWidget.setColumnCount(len(headerlbl))
+            self.tableWidget.setHorizontalHeaderLabels(headerlbl)
+            cols = self.tableWidget.columnCount()
+            colwid = int(self.tableWidget.width() / len(str(Viscols).split(',')) )
+            for i in range(0,cols):
+                if str(Viscols).find(str(i)) < 0:
+                    self.tableWidget.setColumnHidden(i,True)
+                else:
+                    self.tableWidget.setColumnWidth(i,colwid)
+
                 
         for r, r_data in enumerate(table):
             self.tableWidget.insertRow(r)
@@ -157,7 +173,7 @@ class Ui_MainWindow(object):
                 if c>=3:
                     newitem.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.tableWidget.setItem(r,c,newitem)
-    
+
     def BarcodeRead(self):
         tkno = self.txt.text()
         try:
@@ -178,6 +194,16 @@ class Ui_MainWindow(object):
         finally:
             self.txt.selectAll()
 
+    def Show_SettingWindow(self):
+        self.dlg = QtWidgets.QDialog()
+        self.ui = Ui_Dialog()
+        self.ui.setupUi(self.dlg)
+        self.dlg.setModal(True)
+        self.dlg.show()
+        
+    def get_deptIDs(self):
+        grpName = self.cbo.currentText()
+        return self.DeptGrp[grpName]
 if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
