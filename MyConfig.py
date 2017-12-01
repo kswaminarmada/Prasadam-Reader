@@ -45,10 +45,16 @@ class MyConfigs:
 
                     self.cfg.set(MySection, opt, value)
             else:
-                if MySection == "dbConnection":
-                    pass
-                elif MySection == "MySetting":
-                    pass
+                if self.cfg.has_section(MySection):
+                    for opt, value in Configs.items():
+                        for itm in self.encryptedconfig:
+                            sec, key = itm.split(':')
+
+                        if MySection == sec and opt == key:
+                            zx.SetKey(value)
+                            value = "My" + opt
+
+                        self.cfg.set(MySection, opt, value)
             self.cfg.write(fp)
 
     def Get_db_config(self, section='dbConnection'):

@@ -6,7 +6,8 @@ msgbox = QtWidgets.QMessageBox
 class Ui_Dialog(object):
     MySettings = {}
     dbConnection = {}
-
+    DeptGroups = {}
+    changedgroupname = ''
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(400, 300)
@@ -198,6 +199,7 @@ class Ui_Dialog(object):
         cfgs = MyConfigs()
         self.dbConnection = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')
+        self.DeptGroups = cfgs.Get_MySetting('DepartmentGroup')
         self.dbCon = DB_manager.DatabaseUtility(**self.dbConnection)
 
     def SetSettingValues(self,SettingName='dbConnection'):
@@ -210,13 +212,22 @@ class Ui_Dialog(object):
                 self.txtport.setText(self.dbConnection['port'])
                 self.txtLocation.setText(self.MySettings['location'])
                 self.cboDeptGrp.setCurrentText(self.MySettings['departmentgroup'])
+                self.cboGroupName.currentText = self.MySettings['departmentgroup']
                 self.set_lstVisCol(self.MySettings['visiblecols'])
+                self.load_Department()
+                self.load_DepartmentGroup()
+                self.changedgroupname = self.cboGroupName.currentText
+                
         except :
             msgbox.warning(Dialog,"Something wrong","Error while setting values")
             
-
     def Bind_Events(self):
         self.SetSettingValues()
+        self.cboGroupName.currentIndexChanged[int].connect(self.cboGroupName_currentIndexChanged)
+        self.tabWidget.tabBarClicked[int].connect(self.tabDeptGrp_Clicked)
+        self.cboGroupName.editTextChanged[str].connect(self.cboGroupName_EditTextChanged)
+        self.cmdSaveGroups.clicked.connect(self.SaveGroups)
+        self.buttonBox.accepted.connect(self.SaveSettings)
     
     def set_lstVisCol(self,VisibleCols=""):
         tbl,cols = self.dbCon.GetTable("reader_pendingqty where 1=0")
@@ -238,7 +249,91 @@ class Ui_Dialog(object):
         
         return ",".join(cols)
 
+    def get_SelectedGrpDept(self):
+        cols= []
+        for indx in range(0,self.lstDepartment.count()):
+            itm = self.lstDepartment.item(indx)
+            if itm.checkState() == QtCore.Qt.Checked:
+                cols.append(str(indx+1))
         
+        return ",".join(cols)
+
+    def load_DepartmentGroup(self):
+        for itm in self.DeptGroups.items():
+            self.cboDeptGrp.addItem(itm[0])
+            self.cboGroupName.addItem(itm[0])
+
+        self.cboDeptGrp.currentText = self.MySettings['departmentgroup']
+        self.cboGroupName.currentText = self.MySettings['departmentgroup']
+        self.cboGroupName.setCurrentText(self.changedgroupname)
+
+    def cboGroupName_currentIndexChanged(self,ind):
+        for grps in self.DeptGroups.items():
+            if grps[0] == self.cboGroupName.itemText(ind) :
+                for indx in range(self.lstDepartment.count()):
+                    itm = self.lstDepartment.item(indx)
+                    if str(grps[1]).find(str(indx+1))>=0:
+                        itm.setCheckState(QtCore.Qt.Checked)
+                    else:
+                        itm.setCheckState(QtCore.Qt.Unchecked)
+
+    def load_Department(self):
+        departments = self.dbCon.SelectCommand("select `Department` from department order by ID")
+        self.lstDepartment.setSortingEnabled(False)
+        for dept in departments:
+            itm = QtWidgets.QListWidgetItem(self.lstDepartment) 
+            itm.setText(dept[0])
+            itm.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            itm.setCheckState(QtCore.Qt.Unchecked)
+
+    def tabDeptGrp_Clicked(self,indx):
+        if self.tabWidget.tabText(indx) == "Department Group":
+            if self.cboGroupName.count() > 0:
+                indx = self.cboGroupName.findText(self.cboGroupName.currentText)
+                self.cboGroupName_currentIndexChanged(indx)
+
+    def SaveGroups(self):
+        if len(self.changedgroupname)>0:
+            isNew = True
+            for grp in self.DeptGroups.items():
+                if str(grp[0]).lower() == str(self.changedgroupname).lower():
+                    isNew = False
+                    break 
+
+            if isNew :
+                e={}
+                e[self.changedgroupname] = self.get_SelectedGrpDept()
+                self.DeptGroups.update(e)
+                msgbox.information(Dialog,'New Group','Group : {0} , Added  successfully.'.format(self.changedgroupname))
+            else:
+                self.DeptGroups[self.changedgroupname] = self.get_SelectedGrpDept()
+                msgbox.information(Dialog,'Update Group','Group : {0} , Updated successfully.'.format(self.changedgroupname))
+
+            #cfgs.WriteConfig('DepartmentGroup',self.DeptGroups)
+            self.load_DepartmentGroup()
+        else:
+            msgbox.information(Dialog,'','Please, Select or Create Group.')
+
+    def cboGroupName_EditTextChanged(self,txt):
+        self.changedgroupname = txt
+
+    def SaveSettings(self):
+        cfgs = MyConfigs()
+            
+        self.dbConnection['host']= self.txthost.text()
+        self.dbConnection['database']= self.txtdatabase.text()
+        self.dbConnection['user']= self.txtuser.text()
+        self.dbConnection['password']= self.txtpwd.text()
+        self.dbConnection['port']= self.txtport.text()
+
+        self.MySettings['visiblecols'] = self.get_lstVisCol()
+        self.MySettings['departmentgroup'] = self.cboDeptGrp.currentText
+        self.MySettings['location'] = self.txtLocation.text()
+
+        cfgs.WriteConfig('dbConnection',self.dbConnection)
+        cfgs.WriteConfig('MySetting',self.MySettings)
+        cfgs.WriteConfig('DepartmentGroup',self.DeptGroups)
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
