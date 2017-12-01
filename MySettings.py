@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'frmsettings.ui'
-#
-# Created by: PyQt5 UI code generator 5.9.1
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from MyConfig import MyConfigs
+import DB_manager
 
+msgbox = QtWidgets.QMessageBox
 class Ui_Dialog(object):
+    MySettings = {}
+    dbConnection = {}
+
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(400, 300)
@@ -165,6 +163,7 @@ class Ui_Dialog(object):
         Dialog.setTabOrder(self.lstVisCols, self.cboGroupName)
         Dialog.setTabOrder(self.cboGroupName, self.lstDepartment)
         Dialog.setTabOrder(self.lstDepartment, self.cmdSaveGroups)
+        self.Bind_Events()
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -179,6 +178,7 @@ class Ui_Dialog(object):
         __sortingEnabled = self.lstVisCols.isSortingEnabled()
         self.lstVisCols.setSortingEnabled(False)
         item = self.lstVisCols.item(1)
+        item.setCheckState(True)
         item.setText(_translate("Dialog", "Department"))
         item = self.lstVisCols.item(2)
         item.setText(_translate("Dialog", "ItemName"))
@@ -193,8 +193,52 @@ class Ui_Dialog(object):
         self.label_9.setText(_translate("Dialog", "Group Name :"))
         self.cmdSaveGroups.setText(_translate("Dialog", "Save Groups"))
         self.label_10.setText(_translate("Dialog", "Select Department :"))
+        
+    def __init__(self):
+        cfgs = MyConfigs()
+        self.dbConnection = cfgs.Get_db_config()
+        self.MySettings = cfgs.Get_MySetting('MySetting')
+        self.dbCon = DB_manager.DatabaseUtility(**self.dbConnection)
 
+    def SetSettingValues(self,SettingName='dbConnection'):
+        try:
+            if SettingName == 'dbConnection' or 'All' :
+                self.txthost.setText(self.dbConnection['host'])
+                self.txtdatabase.setText(self.dbConnection['database'])
+                self.txtuser.setText(self.dbConnection['user'])
+                self.txtpwd.setText(self.dbConnection['password'])
+                self.txtport.setText(self.dbConnection['port'])
+                self.txtLocation.setText(self.MySettings['location'])
+                self.cboDeptGrp.setCurrentText(self.MySettings['departmentgroup'])
+                self.set_lstVisCol(self.MySettings['visiblecols'])
+        except :
+            msgbox.warning(Dialog,"Something wrong","Error while setting values")
+            
 
+    def Bind_Events(self):
+        self.SetSettingValues()
+    
+    def set_lstVisCol(self,VisibleCols=""):
+        tbl,cols = self.dbCon.GetTable("reader_pendingqty where 1=0")
+        self.lstVisCols.clear()
+        self.lstVisCols.addItems(cols)
+        for indx in range(0,self.lstVisCols.count()):
+            itm = self.lstVisCols.item(indx)
+            itm.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            itm.setCheckState(QtCore.Qt.Unchecked)
+            if VisibleCols.find(str(indx))>=0:
+                itm.setCheckState(QtCore.Qt.Checked)
+                
+    def get_lstVisCol(self):
+        cols= []
+        for indx in range(0,self.lstVisCols.count()):
+            itm = self.lstVisCols.item(indx)
+            if itm.checkState() == QtCore.Qt.Checked:
+                cols.append(str(indx))
+        
+        return ",".join(cols)
+
+        
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

@@ -10,6 +10,7 @@ class MyConfigs:
     dbconfig = {'host': 'localhost', 'database': '',
                             'user': 'root', 'password': '123', 'port': '3306'}
     MySetting = {'VisibleCols':'1,2,3','DepartmentGroup':'1,2,3','Location':''}
+    DepartmentGroup = {'GroupName':'Query'}
     encryptedconfig = ['dbConnection:password']
 
     def __init__(self):
@@ -25,6 +26,9 @@ class MyConfigs:
         
         if not self.cfg.has_section("MySetting"):
             self.WriteConfig("MySetting",self.MySetting)
+        
+        if not self.cfg.has_section("DepartmentGroup"):
+            self.WriteConfig("DepartmentGroup",self.DepartmentGroup)
 
     def WriteConfig(self, MySection, Configs={}):
         with open(self.ConfigFileName, 'w+') as fp:
