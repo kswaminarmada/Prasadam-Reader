@@ -3,23 +3,23 @@ from MyConfig import MyConfigs
 import DB_manager
 
 msgbox = QtWidgets.QMessageBox
-class Ui_Dialog(object):
+class Ui_Dialog(QtWidgets.QDialog):
     MySettings = {}
     dbConnection = {}
     DeptGroups = {}
     changedgroupname = ''
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(400, 300)
-        Dialog.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.India))
-        Dialog.setWindowFilePath("")
-        self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
+    def setupUi(self):
+        self.setObjectName("Dialog")
+        self.resize(400, 300)
+        self.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.India))
+        self.setWindowFilePath("")
+        self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setGeometry(QtCore.QRect(230, 270, 161, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(True)
         self.buttonBox.setObjectName("buttonBox")
-        self.tabWidget = QtWidgets.QTabWidget(Dialog)
+        self.tabWidget = QtWidgets.QTabWidget(self)
         self.tabWidget.setGeometry(QtCore.QRect(10, 10, 381, 261))
         self.tabWidget.setMouseTracking(False)
         self.tabWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.India))
@@ -92,31 +92,6 @@ class Ui_Dialog(object):
         self.lstVisCols = QtWidgets.QListWidget(self.tabMySettings)
         self.lstVisCols.setGeometry(QtCore.QRect(110, 90, 131, 111))
         self.lstVisCols.setObjectName("lstVisCols")
-        item = QtWidgets.QListWidgetItem()
-        item.setText("Date")
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        item.setCheckState(QtCore.Qt.Unchecked)
-        self.lstVisCols.addItem(item)
         self.label_8 = QtWidgets.QLabel(self.tabMySettings)
         self.label_8.setGeometry(QtCore.QRect(0, 50, 101, 20))
         self.label_8.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -153,22 +128,22 @@ class Ui_Dialog(object):
         self.label_10.setObjectName("label_10")
         self.tabWidget.addTab(self.tabDeptGrp, "Department Group")
 
-        self.retranslateUi(Dialog)
+        self.retranslateUi()
         self.tabWidget.setCurrentIndex(0)
-        self.buttonBox.accepted.connect(Dialog.accept)
-        self.buttonBox.rejected.connect(Dialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
-        Dialog.setTabOrder(self.tabWidget, self.txtLocation)
-        Dialog.setTabOrder(self.txtLocation, self.cboDeptGrp)
-        Dialog.setTabOrder(self.cboDeptGrp, self.lstVisCols)
-        Dialog.setTabOrder(self.lstVisCols, self.cboGroupName)
-        Dialog.setTabOrder(self.cboGroupName, self.lstDepartment)
-        Dialog.setTabOrder(self.lstDepartment, self.cmdSaveGroups)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        QtCore.QMetaObject.connectSlotsByName(self)
+        self.setTabOrder(self.tabWidget, self.txtLocation)
+        self.setTabOrder(self.txtLocation, self.cboDeptGrp)
+        self.setTabOrder(self.cboDeptGrp, self.lstVisCols)
+        self.setTabOrder(self.lstVisCols, self.cboGroupName)
+        self.setTabOrder(self.cboGroupName, self.lstDepartment)
+        self.setTabOrder(self.lstDepartment, self.cmdSaveGroups)
         self.Bind_Events()
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Settings"))
+        self.setWindowTitle(_translate("Dialog", "Settings"))
         self.label.setText(_translate("Dialog", "Host :"))
         self.label_2.setText(_translate("Dialog", "Database :"))
         self.label_3.setText(_translate("Dialog", "User :"))
@@ -176,26 +151,13 @@ class Ui_Dialog(object):
         self.label_5.setText(_translate("Dialog", "Port :"))
         self.label_6.setText(_translate("Dialog", "Visible Columns :"))
         self.label_7.setText(_translate("Dialog", "Location :"))
-        __sortingEnabled = self.lstVisCols.isSortingEnabled()
-        self.lstVisCols.setSortingEnabled(False)
-        item = self.lstVisCols.item(1)
-        item.setCheckState(True)
-        item.setText(_translate("Dialog", "Department"))
-        item = self.lstVisCols.item(2)
-        item.setText(_translate("Dialog", "ItemName"))
-        item = self.lstVisCols.item(3)
-        item.setText(_translate("Dialog", "OrderedQty"))
-        item = self.lstVisCols.item(4)
-        item.setText(_translate("Dialog", "ServedQty"))
-        item = self.lstVisCols.item(5)
-        item.setText(_translate("Dialog", "PendingOrder"))
-        self.lstVisCols.setSortingEnabled(__sortingEnabled)
         self.label_8.setText(_translate("Dialog", "Department Group :"))
         self.label_9.setText(_translate("Dialog", "Group Name :"))
         self.cmdSaveGroups.setText(_translate("Dialog", "Save Groups"))
         self.label_10.setText(_translate("Dialog", "Select Department :"))
         
     def __init__(self):
+        super().__init__()
         cfgs = MyConfigs()
         self.dbConnection = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')
@@ -304,15 +266,15 @@ class Ui_Dialog(object):
                 e={}
                 e[self.changedgroupname] = self.get_SelectedGrpDept()
                 self.DeptGroups.update(e)
-                msgbox.information(Dialog,'New Group','Group : {0} , Added  successfully.'.format(self.changedgroupname))
+                msgbox.information(self,'New Group','Group : {0} , Added  successfully.'.format(self.changedgroupname))
             else:
                 self.DeptGroups[self.changedgroupname] = self.get_SelectedGrpDept()
-                msgbox.information(Dialog,'Update Group','Group : {0} , Updated successfully.'.format(self.changedgroupname))
+                msgbox.information(self,'Update Group','Group : {0} , Updated successfully.'.format(self.changedgroupname))
 
             #cfgs.WriteConfig('DepartmentGroup',self.DeptGroups)
             self.load_DepartmentGroup()
         else:
-            msgbox.information(Dialog,'','Please, Select or Create Group.')
+            msgbox.information(self,'','Please, Select or Create Group.')
 
     def cboGroupName_EditTextChanged(self,txt):
         self.changedgroupname = txt
@@ -337,9 +299,8 @@ class Ui_Dialog(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
+    Dialog = Ui_Dialog()
+    Dialog.setupUi()
     Dialog.show()
     sys.exit(app.exec_())
 

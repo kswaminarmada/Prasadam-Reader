@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 from datetime import datetime
 from mysql.connector import Error
 from MyConfig import MyConfigs
-from MySettings import Ui_Dialog
+from MySettingsW import Ui_Dialog
 
 msgbox = QtWidgets.QMessageBox
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -130,6 +130,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.mnuSettings.setEnabled(self.IsAdmin)
         self.dt.setEnabled(self.IsAdmin)
         self.cbo.setEnabled(self.IsAdmin)
+        self.FillTable()
 
     def __init__(self):
         super().__init__()
@@ -142,8 +143,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def FillDepartment(self):
         departments = self.DeptGrp.keys()
         self.cbo.addItems(departments)
-        #for dept in departments:
-        #   self.cbo.addItem(dept)
         self.cbo.setCurrentText(self.MySettings['departmentgroup'])
 
     def FillTable(self):
@@ -198,9 +197,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.txt.selectAll()
 
     def Show_SettingWindow(self):
-        self.dlg = QtWidgets.QDialog()
-        self.ui = Ui_Dialog()
-        self.ui.setupUi(self.dlg)
+        self.dlg = Ui_Dialog()
+        self.dlg.setupUi()
         self.dlg.setModal(True)
         self.dlg.show()
         
@@ -214,6 +212,6 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     ui = Ui_MainWindow()
-    ui.setupUi(True)
+    ui.setupUi()
     ui.show()
     sys.exit(app.exec_())
