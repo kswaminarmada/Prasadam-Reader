@@ -157,7 +157,7 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.label_10.setText(_translate("Dialog", "Select Department :"))
         
     def __init__(self):
-        super().__init__()
+        super(Ui_Dialog,self).__init__()
         cfgs = MyConfigs()
         self.dbConnection = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')

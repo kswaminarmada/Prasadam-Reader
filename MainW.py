@@ -133,7 +133,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.FillTable()
 
     def __init__(self):
-        super().__init__()
+        super(Ui_MainWindow,self).__init__()
         cfgs = MyConfigs()
         connstring = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')

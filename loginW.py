@@ -8,7 +8,7 @@ msgbox = QtWidgets.QMessageBox
 
 class Ui_login(QtWidgets.QDialog):
     def __init__(self):
-        super().__init__()
+        super(Ui_login,self).__init__()
         cfgs = MyConfigs()
         connstring = cfgs.Get_db_config()
         self.dbCon = DB_manager.DatabaseUtility(**connstring)
