@@ -138,6 +138,5 @@ class DatabaseUtility:
         return Out_args
 
     def __del__(self):
-        self.conn.commit()
         self.cursor.close()
         self.conn.close()

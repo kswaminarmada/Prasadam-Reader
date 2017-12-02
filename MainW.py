@@ -151,7 +151,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         depts = self.get_deptIDs()
         #dept = self.cbo.currentText()
         table, headerlbl = self.dbCon.GetTable(
-            "reader_pendingqty where ordereddate='{0}' and department in (select dept.Department from department as dept where ID in ({1}))".format(dts, str(depts)))
+            "reader_pendingqty where ordereddate='{0}' and department in (select dept.Department from department as dept where ID in ({1})) order by deptid,ItemName".format(dts, str(depts)))
         Viscols = self.MySettings['visiblecols']
         self.tableWidget.setRowCount(0)
         if self.tableWidget.columnCount() < 1:
@@ -170,7 +170,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.tableWidget.insertRow(r)
             for c, data in enumerate(r_data):
                 newitem = QtWidgets.QTableWidgetItem(str(data))
-                if c>=3:
+                if c>=4:
                     newitem.setTextAlignment(QtCore.Qt.AlignCenter)
                 self.tableWidget.setItem(r,c,newitem)
 
@@ -178,21 +178,23 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         tkno = self.txt.text()
         if tkno.find('-') < 1: return
         try:
-            tknos = tkno.split('-',1)
-            tkno = int(tknos[0])
-            dpt = int(tknos[1])
-            grpdept = self.get_deptIDs()
+            tknos = tkno.split('-')
+            if len(tknos)==2:
+                tkno = int(tknos[0]) if str(tknos[0]).isdigit() else 0
+                dpt = int(tknos[1]) if str(tknos[1]).isdigit() else 0
+                grpdept = self.get_deptIDs()
 
-            if grpdept.find(tknos[1]) >= 0:
-                args = [tkno, dpt]
-                result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
+                if grpdept.find(tknos[1]) >= 0:
+                    args = [tkno, dpt]
+                    result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
+                    self.FillTable()
+                else:
+                    msgbox.information(self,"Invalid Department","Not Valid TokenNo with your Department Group.")     
             else:
-                msgbox.information(self,"Invalid Department","Not Valid TokenNo with your Department Group.")
-                pass
-      
+                msgbox.critical(self,"Reader Error","Invalid Reader Data, please try again.")
+                self.txt.selectAll()
         except Error as e:
             msgbox.warning(self,"MySQL Error",str(e.msg))
-            pass
         finally:
             self.txt.selectAll()
 
