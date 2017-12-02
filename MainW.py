@@ -6,18 +6,18 @@ from MyConfig import MyConfigs
 from MySettings import Ui_Dialog
 
 msgbox = QtWidgets.QMessageBox
-class Ui_MainWindow(object):
+class Ui_MainWindow(QtWidgets.QMainWindow):
     MySettings = {}
     DeptGrp = {}
     IsAdmin = False
-    def setupUi(self, MainWindow, isAdmin=False):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(570, 408)
+    def setupUi(self, isAdmin=False):
+        self.setObjectName("MainWindow")
+        self.resize(570, 408)
         font = QtGui.QFont()
         font.setFamily("Calibri")
         font.setPointSize(9)
-        MainWindow.setFont(font)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.setFont(font)
+        self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.lbl = QtWidgets.QLabel(self.centralwidget)
         self.lbl.setGeometry(QtCore.QRect(30, 70, 81, 20))
@@ -79,18 +79,18 @@ class Ui_MainWindow(object):
         self.lbl_3.setText("Department :")
         self.lbl_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_3.setObjectName("lbl_3")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menuBar = QtWidgets.QMenuBar(MainWindow)
+        self.setCentralWidget(self.centralwidget)
+        self.menuBar = QtWidgets.QMenuBar(self)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 570, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuCounter = QtWidgets.QMenu(self.menuBar)
         self.menuCounter.setObjectName("menuCounter")
-        MainWindow.setMenuBar(self.menuBar)
-        self.mnuSettings = QtWidgets.QAction(MainWindow)
+        self.setMenuBar(self.menuBar)
+        self.mnuSettings = QtWidgets.QAction(self)
         self.mnuSettings.setObjectName("mnuSettings")
-        self.mnuDeptGrp = QtWidgets.QAction(MainWindow)
+        self.mnuDeptGrp = QtWidgets.QAction(self)
         self.mnuDeptGrp.setObjectName("mnuDeptGrp")
-        self.mnuExit = QtWidgets.QAction(MainWindow)
+        self.mnuExit = QtWidgets.QAction(self)
         self.mnuExit.setObjectName("mnuExit")
         self.menuCounter.addAction(self.mnuSettings)
         self.menuCounter.addSeparator()
@@ -100,28 +100,28 @@ class Ui_MainWindow(object):
         self.lbl_2.setBuddy(self.txt)
         self.lbl_3.setBuddy(self.txt)
 
-        self.retranslateUi(MainWindow)
-        self.mnuExit.triggered.connect(MainWindow.close)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        MainWindow.setTabOrder(self.dt, self.cbo)
-        MainWindow.setTabOrder(self.cbo, self.txt)
-        MainWindow.setTabOrder(self.txt, self.cmd)
-        MainWindow.setTabOrder(self.cmd, self.tableWidget)
+        self.retranslateUi()
+        self.mnuExit.triggered.connect(self.close)
+        QtCore.QMetaObject.connectSlotsByName(self)
+        self.setTabOrder(self.dt, self.cbo)
+        self.setTabOrder(self.cbo, self.txt)
+        self.setTabOrder(self.txt, self.cmd)
+        self.setTabOrder(self.cmd, self.tableWidget)
         self.IsAdmin = isAdmin
-        self.bind_Events(MainWindow)
+        self.bind_Events()
     
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.menuCounter.setTitle(_translate("MainWindow", "Counter"))
         self.mnuSettings.setText(_translate("MainWindow", "Settings"))
         self.mnuDeptGrp.setText(_translate("MainWindow", "Department Group"))
         self.mnuExit.setText(_translate("MainWindow", "Exit"))
         
-    def bind_Events(self,MainWindow):
+    def bind_Events(self):
         curdate = self.dbCon.SelectCommand("select cast(curdate() as char)")
         year,month,day = curdate[0].split('-')
-        MainWindow.setWindowTitle(self.MySettings['location'])
+        self.setWindowTitle(self.MySettings['location'])
         self.dt.setDate(QtCore.QDate(int(year),int(month),int(day)))
         self.txt.returnPressed.connect(self.BarcodeRead)
         self.cmd.clicked.connect(self.FillTable)
@@ -132,6 +132,7 @@ class Ui_MainWindow(object):
         self.cbo.setEnabled(self.IsAdmin)
 
     def __init__(self):
+        super().__init__()
         cfgs = MyConfigs()
         connstring = cfgs.Get_db_config()
         self.MySettings = cfgs.Get_MySetting('MySetting')
@@ -187,11 +188,11 @@ class Ui_MainWindow(object):
                 args = [tkno, dpt]
                 result_args = self.dbCon.ExecuteStoredProcedure('Insert_ReaderData', args)
             else:
-                #msgbox.information(MainWindow,"Invalid Department","Not Valid TokenNo with your Department Group.")
+                msgbox.information(self,"Invalid Department","Not Valid TokenNo with your Department Group.")
                 pass
       
         except Error as e:
-            #msgbox.warning(MainWindow,"MySQL Error",str(e.msg))
+            msgbox.warning(self,"MySQL Error",str(e.msg))
             pass
         finally:
             self.txt.selectAll()
@@ -206,14 +207,13 @@ class Ui_MainWindow(object):
     def get_deptIDs(self):
         grpName = self.cbo.currentText()
         return self.DeptGrp[grpName]
-
+    
     def __del__(self):
         self.dbCon.conn.close()
 if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    ui.setupUi(True)
+    ui.show()
     sys.exit(app.exec_())
