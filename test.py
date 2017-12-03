@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(570, 408)
+        MainWindow.resize(570, 433)
         font = QtGui.QFont()
         font.setFamily("Calibri")
         font.setPointSize(9)
@@ -37,12 +37,6 @@ class Ui_MainWindow(object):
         self.dt.setCalendarPopup(True)
         self.dt.setDate(QtCore.QDate(2017, 11, 26))
         self.dt.setObjectName("dt")
-        self.cmd = QtWidgets.QPushButton(self.centralwidget)
-        self.cmd.setGeometry(QtCore.QRect(240, 70, 61, 21))
-        self.cmd.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.cmd.setText("Ok")
-        self.cmd.setDefault(True)
-        self.cmd.setObjectName("cmd")
         self.cbo = QtWidgets.QComboBox(self.centralwidget)
         self.cbo.setEnabled(False)
         self.cbo.setGeometry(QtCore.QRect(120, 40, 111, 20))
@@ -104,8 +98,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.dt, self.cbo)
         MainWindow.setTabOrder(self.cbo, self.txt)
-        MainWindow.setTabOrder(self.txt, self.cmd)
-        MainWindow.setTabOrder(self.cmd, self.tableWidget)
+        MainWindow.setTabOrder(self.txt, self.tableWidget)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
