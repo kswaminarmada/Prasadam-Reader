@@ -1,0 +1,8 @@
+for Main Form
+pyuic5 -x Test.ui -o Test.py 
+
+For login Form
+pyuic5 -x login.ui -o loginui.py
+
+for MySetting Form
+pyuic5 -x frmsettings.ui -o UIMySettings.py 
