@@ -1,6 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import DB_manager
-from Main import Ui_MainWindow
 from MyConfig import MyConfigs
 from MainW import Ui_MainWindow
 
